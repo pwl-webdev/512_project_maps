@@ -21,16 +21,48 @@ $(document).ready(function(){
 });
 var map;
 var locations = [];
+var InfoWindow;
+var markers = [];
+var bounds;
 
-var addLocations = function(){
-	locations.push({desc: $('#Desc').val(), location: {lat: $('#Lat').val(), lng: $('#Lon').val()}});
+var addLocation = function(){
+	locations.push({title: $('#Desc').val(), location: {lat: parseFloat($('#Lat').val()), lng: parseFloat($('#Lon').val())}});
 		//{title: "Park Ave", location: {lat: 40.7713024, lng: -73.9632393}},
+	var position = locations[locations.length-1].location;
+	var title = locations[locations.length-1].title;
+	var marker = new google.maps.Marker({
+		map: map,
+		position: position,
+		title: title,
+		animation: google.maps.Animation.DROP,
+		id: locations.length-1
+	});
+	markers.push(marker);
+	marker.addListener('click',function(){
+		populateInfoWindow(this, InfoWindow);
+	});
+	bounds.extend(markers[markers.length-1].position);
+	map.setCenter(position);
 }
+
+var populateInfoWindow = function(marker, infowindow) {
+        if (infowindow.marker != marker) {
+          infowindow.marker = marker;
+          infowindow.setContent('<div>' + marker.title + '</div>');
+          infowindow.open(map, marker);
+          infowindow.addListener('closeclick',function(){
+            infowindow.setMarker(null);
+        });
+    }
+}
+
 
 var initMap = function(){
 	map = new google.maps.Map(document.getElementById('map'),{
 		center:{lat: 50, lng: 0},
-		zoom: 6,
+		zoom: 2,
 		mapTypeControl: false
 	});
+	InfoWindow = new google.maps.InfoWindow();
+	bounds = new google.maps.LatLngBounds()
 }
